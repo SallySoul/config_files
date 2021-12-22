@@ -1,0 +1,5 @@
+[user]
+	name = RussellBentley
+	email = russell.w.bentley@icloud.com
+[core]
+	editor = nvim
