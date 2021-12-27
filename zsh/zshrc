@@ -22,6 +22,11 @@ col_echo "Running ~/.zshrc ..." 3
 col_echo "Not in Emacs" 5
 PROMPT="%{$(tput setaf 236; tput setab 141)%}%1~:%n%{$(tput sgr0; tput setaf 141)%} %{$(tput sgr0)%}"
 
+#
+# Completions
+#
+zstyle ':completion:*:*:git:*' script ~/config_files/zsh/git-completion.zsh
+
 ######################
 # Shell  Settings
 ######################
@@ -83,6 +88,23 @@ xargs clang-format -i --style=file"
 # Cargo Aliases
 alias ctl='cargo test --color always -- --nocapture 2>&1 | less'
 alias cbl='cargo build --color always 2>&1 | less'
+function cblt {
+	OUT_LOG=~/temp/out.log
+	ERR_LOG=~/temp/err.log
+
+	col_echo "Remove old files ${OUT_LOG} and ${ERR_LOG}" 3
+	rm -f $OUT_LOG $ERR_LOG
+
+	col_echo "Touch log files" 3
+	touch $OUT_LOG
+	touch $ERR_LOG
+
+	col_echo "Run test" 3
+	cargo test $1 --color always -- --nocapture  2>$ERR_LOG 1>$OUT_LOG
+
+	col_echo "Assemble output" 3
+	cat $OUT_LOG $ERR_LOG | less
+}
 function cel {
     cargo run --release --color always --example $1 2>&1 | less
 }

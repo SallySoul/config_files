@@ -45,10 +45,69 @@ Plug 'dracula/vim', { 'as': 'dracula' }
 " Export tmux powerline config
 Plug 'edkolev/tmuxline.vim'
 
+" File Explorer
 Plug 'preservim/nerdtree'
 
+# 
 Plug 'vim-test/vim-test'
+
+# Help show leader key
+Plug 'spinks/vim-leader-guide'
 call plug#end()
+
+"
+" Things to Remember
+"
+" map is recursive
+" noremap is not
+"
+" no prefix is normal mode
+" v prefix is visual mode
+" i prefix is insert mode
+"
+" Strong Operators
+" == and is are string equality
+" is# and ==# match case
+" is? and ==? are ignore case
+" (Recall that set ignorecase is a common statement elsewhere, these are
+" absolute)
+" =~ is a regex match
+" !~ is not a regex match
+"
+
+" Setup for vim-leader-guide and spacevim_bind
+let mapleader = '\<Space>'
+nnoremap <silent> <leader> :<c-u>LeaderGuide '<Space>'<CR>
+vnoremap <silent> <leader> :<c-u>LeaderGuideVisual '<Space>'<CR>
+" use like
+" let g:lmap.a = { 'name': '+applications' }
+
+"
+" spacevim_bind
+"
+" This is from plugin/spacevim.vim
+" Useful, and now I can copy code
+function! s:spacevim_bind(map, binding, name, value, isCmd)
+  if a:isCmd
+    let l:value = ':' . a:value . '<cr>'
+  else
+    let l:value = a:value
+  endif
+  if a:map ==# 'map' && maparg('<Leader>' . a:binding, '') ==# ''
+    let l:noremap = 'noremap'
+  elseif a:map ==# 'nmap' && maparg('<Leader>' . a:binding, 'n') ==# ''
+    let l:noremap = 'nnoremap'
+  elseif a:map ==# 'vmap' && maparg('<Leader>' . a:binding, 'v') ==# ''
+    let l:noremap = 'vnoremap'
+  else
+    let l:noremap = ''
+  endif
+
+  if l:noremap !=# ''
+    execute l:noremap . ' <silent> <SID>' . a:name . '# ' . l:value
+    execute a:map . ' <Leader>' . a:binding . ' <SID>' . a:name . '#'
+  endif
+endfunction
 
 "
 " Also from the rust blog post
