@@ -48,10 +48,7 @@ Plug 'edkolev/tmuxline.vim'
 " File Explorer
 Plug 'preservim/nerdtree'
 
-# 
-Plug 'vim-test/vim-test'
-
-# Help show leader key
+" Help show leader key
 Plug 'spinks/vim-leader-guide'
 call plug#end()
 
@@ -65,7 +62,7 @@ call plug#end()
 " v prefix is visual mode
 " i prefix is insert mode
 "
-" Strong Operators
+" String Operators
 " == and is are string equality
 " is# and ==# match case
 " is? and ==? are ignore case
@@ -76,9 +73,10 @@ call plug#end()
 "
 
 " Setup for vim-leader-guide and spacevim_bind
-let mapleader = '\<Space>'
+let mapleader = ''
 nnoremap <silent> <leader> :<c-u>LeaderGuide '<Space>'<CR>
 vnoremap <silent> <leader> :<c-u>LeaderGuideVisual '<Space>'<CR>
+let g:lmap = {}
 " use like
 " let g:lmap.a = { 'name': '+applications' }
 
@@ -207,8 +205,13 @@ EOF
 "
 " Stuff I added
 "
+set tabstop=2 shiftwidth=2 expandtab
 
 colorscheme dracula
+
+let g:lmap.w = { 'name': '+window' }
+let g:lmap.f = { 'name': '+files' }
+
 
 " Find files using Telescope command-line sugar.
 nnoremap <C-f>f <cmd>Telescope find_files<cr>
@@ -239,5 +242,3 @@ let g:airline_theme='dracula'
 let g:airline_powerline_fonts = 1
 
 highlight LspDiagnosticsDefaultError ctermfg=Red
-
-
