@@ -20,12 +20,15 @@ function col_echo {
 col_echo "Running ~/.zshrc ..." 3
 PROMPT="%{$(tput setaf 236; tput setab 141)%}%1~:%n%{$(tput sgr0; tput setaf 141)%} %{$(tput sgr0)%}"
 
+export OMP_THREAD_NUM=8
+
 # Completions
 zstyle ':completion:*:*:git:*' script ~/config_files/zsh/git-completion.zsh
 
 # Setup system paths
 export PATH="/usr/local/bin"
 export PATH="/usr/bin:${PATH}"
+export PATH="/usr/sbin:${PATH}"
 export PATH="/bin:${PATH}"
 export PATH="/sbin:${PATH}"
 export PKG_CONFIG_PATH=""
@@ -62,6 +65,8 @@ export CC=/Users/russell/installed_software/bin/clang
 export OMPI_CXX=$CXX
 export OMPI_MPICC=$CC
 
+# Obsidian Home
+export OBSIDIAN_HOME="/Users/russell/Library/Mobile Documents/iCloud~md~obsidian/Documents/Research"
 
 # What's this for again?
 export EMAIL_ADDRESS='russell.w.bentley@icloud.com'
@@ -100,6 +105,24 @@ alias conans='conan install -s build_type=Release .. --build=missing'
 # Cargo Aliases
 alias ctl='cargo test --color always -- --nocapture 2>&1 | less'
 alias cbl='cargo build --color always 2>&1 | less'
+function ctltr {
+	OUT_LOG=~/temp/out.log
+	ERR_LOG=~/temp/err.log
+
+	col_echo "Remove old files ${OUT_LOG} and ${ERR_LOG}" 3
+	rm -f $OUT_LOG $ERR_LOG
+
+	col_echo "Touch log files" 3
+	touch $OUT_LOG
+	touch $ERR_LOG
+
+	col_echo "Run test" 3
+	cargo test $1 --release --color always -- --nocapture  2>$ERR_LOG 1>$OUT_LOG
+
+	col_echo "Assemble output" 3
+	cat $OUT_LOG $ERR_LOG | less -R
+}
+
 function ctlt {
 	OUT_LOG=~/temp/out.log
 	ERR_LOG=~/temp/err.log
@@ -119,7 +142,7 @@ function ctlt {
 }
 
 function cel {
-    cargo run --release --color always --example $1 2>&1 | less
+    cargo run --release --color always --example $1 2>&1 | less -R
 }
 
 function make1l {
@@ -249,14 +272,14 @@ function formatChanges {
     git status | \
     rg '\W+(modified|new file):\W+([a-zA-Z./]+)' -r '$2' | \
     rg '\.(cpp|h)$' | \
-    xargs clang-format -i --style=file
+    xargs clang-format-11 -i --style=file
 }
 
 function formatAll {
     find \
         core test/src test/inc cli scripts \
         '(' -name '*.cpp' -or -name '*.h' ')' -exec \
-        clang-format -i --style=file --verbose {} ';'
+        clang-format-11 -i --style=file --verbose {} ';'
 
 #    find \
 #        core test/src test/inc cli scripts \
@@ -274,23 +297,40 @@ function rgl {
     rg $1 --color=always --heading --line-number | less
 }
 
+function rgil {
+    rg -i $1 --color=always --heading --line-number | less
+}
+
 # Source python venv
 col_echo "Sourcing pythonv env" 3
 export VIRTUAL_ENV_DISABLE_PROMPT=1
 source ~/.config/python_venv/bin/activate
 unset VIRTUAL_ENV_DISABLE_PROMPT
 
-function lastScreenShot {
-  if [[ -v $1 ]]; then
-    dest_path=$1
-  else
-    dest_path="pic.png"
-  fi
+function lastScreenshot {
+  dest_path=$1
 
   pic_path=`ls ~/Pictures/Screenshots -s modified | rg -v 'DS_Store' | tail -n 1 | xargs -I {} echo "/Users/russell/Pictures/Screenshots/{}"`
 
   col_echo "cp $pic_path to $dest_path" 4
   cp "$pic_path" "$dest_path"
+}
+
+function lastPdf {
+  dest_path="${OBSIDIAN_HOME}/Papers/pdfs/$1"
+
+  pdf_path=`ls ~/Downloads/*.pdf -s modified | tail -n 1`
+  pdf_name=$dest_path:t
+
+  col_echo "pdf name: ${pdf_name}" 4 &&
+  col_echo "cp $pdf_path to $dest_path" 4 &&
+  cp "$pdf_path" "$dest_path" &&
+
+  ( echo "---" &&
+    echo "annotation-target: Papers/pdfs/$pdf_name" &&
+    echo "---" ) | \
+    pbcopy
+  pbpaste
 }
 
 ######################
