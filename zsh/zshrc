@@ -17,6 +17,12 @@ function col_echo {
     tput sgr0
 
 }
+
+if [ -f /etc/motd ]
+then
+  cat /etc/motd
+fi
+
 col_echo "Running ~/.zshrc ..." 3
 PROMPT="%{$(tput setaf 236; tput setab 141)%}%1~:%n%{$(tput sgr0; tput setaf 141)%} %{$(tput sgr0)%}"
 
@@ -186,16 +192,22 @@ alias less='less -R'
 
 # Info / Inspect aliases
 alias ip="ifconfig | rg 'inet\s+(\d{3}\.\d{3}\.\d\.\d{3})' -o -r '\$1'"
-alias i="echo \"host: $(hostname)\"; echo \"ip: `ip`\"; echo \"CPU Cores: `/usr/sbin/sysctl -n hw.ncpu`\""
 alias spacereport="du -h -d 2 . | sort -k 1 -h | less"
 
 # exa aliases
-alias ls='exa --all'
-alias ll='exa --all --long --header'
-alias lll='exa --long --header --color=always | less -R'
-alias tree='exa --long --tree -I .git'
-alias mtreel='exa --tree -I .git --color=always | less -R'
-alias treel='exa --long --tree -I .git --color=always | less -R'
+env exa 2>/dev/null
+if [ $? -eq 0 ]
+then
+  col_echo "exa found" 3
+  alias ls='exa --all'
+  alias ll='exa --all --long --header'
+  alias lll='exa --long --header --color=always | less -R'
+  alias tree='exa --long --tree -I .git'
+  alias mtreel='exa --tree -I .git --color=always | less -R'
+  alias treel='exa --long --tree -I .git --color=always | less -R'
+else
+  col_echo "exa not found" 3
+fi
 
 # NeoVim aliases
 alias view='nvim -R'
@@ -302,10 +314,15 @@ function rgil {
 }
 
 # Source python venv
-col_echo "Sourcing pythonv env" 3
-export VIRTUAL_ENV_DISABLE_PROMPT=1
-source ~/.config/python_venv/bin/activate
-unset VIRTUAL_ENV_DISABLE_PROMPT
+if [ -f ~/.config/python_venv/bin/activate ]
+then
+  col_echo "Sourcing pythonv env" 3
+  export VIRTUAL_ENV_DISABLE_PROMPT=1
+  source ~/.config/python_venv/bin/activate
+  unset VIRTUAL_ENV_DISABLE_PROMPT
+else
+  col_echo "No venv to source" 3
+fi
 
 function lastScreenshot {
   dest_path=$1
