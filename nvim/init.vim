@@ -26,7 +26,7 @@ Plug 'hrsh7th/cmp-buffer'
 Plug 'simrat39/rust-tools.nvim'
 
 " Snippet engine
-Plug 'hrsh7th/vim-vsnip'
+"Plug 'hrsh7th/vim-vsnip'
 
 " Fuzzy finder
 " Optional
