@@ -40,6 +40,7 @@ export PATH="/sbin:${PATH}"
 export PKG_CONFIG_PATH=""
 export LDFLAGS=""
 export LD_LIBRARY_PATH=""
+export CMAKE_MODULE_PATH=""
 
 # brew shellenv
 export HOMEBREW_PREFIX="/opt/homebrew"
@@ -60,6 +61,16 @@ export PATH="/Users/russell/installed_software/bin:$PATH"
 export LDFLAGS="-L/opt/homebrew/opt/llvm/lib -Wl,-rpath,/opt/homebrew/opt/llvm/lib ${LDFLAGS}"
 export PATH="/opt/homebrew/opt/llvm/bin:$PATH"
 export CPPFLAGS="-I/opt/homebrew/opt/llvm/include"
+
+# Use ~/projects/tools/lib2geom
+export CMAKE_MODULE_PATH="/Users/russell/projects/tools/lib2geom;${CMAKE_MODULE_PATH}"
+
+# Use Brew QT5
+export PATH="/opt/homebrew/opt/qt@5/bin:$PATH"
+export LDFLAGS="-L/opt/homebrew/opt/qt@5/lib ${LDFLAGS}"
+export CPPFLAGS="-I/opt/homebrew/opt/qt@5/include ${LDFLAGS}"
+export PKG_CONFIG_PATH="/opt/homebrew/opt/qt@5/lib/pkgconfig:${PKG_CONFIG_PATH}"
+export CMAKE_MODULE_PATH="/opt/homebrew/opt/qt5/lib/cmake/Qt5:${CMAKE_MODULE_PATH}"
 
 # Update env variables
 export PATH="${HOME}/.cargo/bin:${PATH}"
@@ -104,6 +115,10 @@ alias gip='git pull'
 alias gitlog='git log --graph'
 alias removeUntrackedFiles='sudo git ls-files --others --exclude-standard | xargs rm -rf'
 alias fixSubmodules='git submodule update --init --recursive'
+
+function addWorktree {
+  git worktree add -b "$1" "../$1" 
+}
 
 # conan alias
 alias conans='conan install -s build_type=Release .. --build=missing'
@@ -195,7 +210,7 @@ alias ip="ifconfig | rg 'inet\s+(\d{3}\.\d{3}\.\d\.\d{3})' -o -r '\$1'"
 alias spacereport="du -h -d 2 . | sort -k 1 -h | less"
 
 # exa aliases
-env exa 2>/dev/null
+env exa 2>&1 > /dev/null
 if [ $? -eq 0 ]
 then
   col_echo "exa found" 3
@@ -252,6 +267,10 @@ function edit {
     alacritty)
 	      nvim ~/.config/alacritty/alacritty.yml
 	      ;;
+    ssh)
+	      nvim ~/.ssh/config
+	      ;;
+
     *)
         echo "$1 is not in edit ..."
         ;;
