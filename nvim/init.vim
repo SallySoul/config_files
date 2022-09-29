@@ -225,6 +225,8 @@ nnoremap <C-f>n <cmd>:NERDTreeToggle<cr>
 nnoremap <C-f>m <cmd>:NERDTreeFind<cr>
 
 " Code navigation
+nnoremap <C-s>n <cmd>lua vim.lsp.diagnostic.goto_next()<cr>
+nnoremap <C-s>p <cmd>lua vim.lsp.diagnostic.goto_prev()<cr>
 nnoremap <C-s>e <cmd>lua vim.lsp.diagnostic.show_line_diagnostics()<cr>
 nnoremap <C-s>d <cmd>lua vim.lsp.buf.definition()<cr>
 nnoremap <C-s>r <cmd>lua vim.lsp.buf.references()<cr>
