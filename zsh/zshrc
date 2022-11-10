@@ -78,8 +78,8 @@ export PATH="${HOME}/.cargo/bin:${PATH}"
 export PATH="${HOME}/.rustup/toolchains/nightly-x86_64-apple-darwin/bin:${PATH}"
 export PATH="/usr/local/texlive/2021/bin/universal-darwin:${PATH}"
 export SDKROOT=/Library/Developer/CommandLineTools/SDKs/MacOSX12.0.sdk
-export CXX=/Users/russell/installed_software/bin/clang++
-export CC=/Users/russell/installed_software/bin/clang
+export CXX=clang++
+export CC=clang
 export OMPI_CXX=$CXX
 export OMPI_MPICC=$CC
 
@@ -403,6 +403,17 @@ function lastPdf {
     echo "---" ) | \
     pbcopy
   pbpaste
+}
+
+function frame2film {
+  ffmpeg \
+    -framerate 30 \
+    -pattern_type glob \
+    -i "$1" \
+    -c:v \
+    libx264 \
+    -pix_fmt yuv420p \
+    "$2"
 }
 
 ######################

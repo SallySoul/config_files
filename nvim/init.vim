@@ -212,6 +212,8 @@ colorscheme dracula
 let g:lmap.w = { 'name': '+window' }
 let g:lmap.f = { 'name': '+files' }
 
+let g:filetype_prolog="prolog"
+
 
 " Find files using Telescope command-line sugar.
 nnoremap <C-f>f <cmd>Telescope find_files<cr>
