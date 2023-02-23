@@ -50,6 +50,9 @@ Plug 'preservim/nerdtree'
 
 " Help show leader key
 Plug 'spinks/vim-leader-guide'
+
+" Tex stuff
+Plug 'lervag/vimtex'
 call plug#end()
 
 "
