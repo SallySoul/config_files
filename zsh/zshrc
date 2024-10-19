@@ -46,9 +46,6 @@ fi
 
 col_echo "Homebrew prefix: ${HOMEBREW_PREFIX}" 3
 
-
-export OMP_THREAD_NUM=8
-
 # Completions
 zstyle ':completion:*:*:git:*' script ~/config_files/zsh/git-completion.zsh
 
@@ -59,7 +56,10 @@ export PATH="/usr/sbin:${PATH}"
 export PATH="/bin:${PATH}"
 export PATH="/sbin:${PATH}"
 export PATH="/opt/homebrew/bin:${PATH}"
+export PATH="/usr/local/smlnj/bin:${PATH}"
+export PATH="/opt/homebrew/opt/llvm@17/bin:${PATH}"
 export PKG_CONFIG_PATH=""
+export CPPFLAGS=""
 export LDFLAGS=""
 export LD_LIBRARY_PATH=""
 export CMAKE_MODULE_PATH=""
@@ -68,44 +68,36 @@ export CMAKE_MODULE_PATH=""
 export LD_LIBRARY_PATH="/Users/russell/installed_software/lib"
 export PATH="/Users/russell/installed_software/bin:${PATH}"
 
-# Use brew llvm
-export LDFLAGS="-L${HOMEBREW_PREFIX}/opt/llvm/lib -Wl,-rpath,${HOMEBREW_PREFIX}/opt/llvm/lib ${LDFLAGS}"
-export PATH="${HOMEBREW_PREFIX}/opt/llvm/bin:$PATH"
-export CPPFLAGS="-I${HOMEBREW_PREFIX}/opt/llvm/include"
-
 # Use ~/projects/tools/lib2geom
 export CMAKE_MODULE_PATH="/Users/russell/projects/tools/lib2geom;${CMAKE_MODULE_PATH}"
 
-# Use Brew QT5
-export PATH="/opt/homebrew/opt/qt@5/bin:$PATH"
-export LDFLAGS="-L/opt/homebrew/opt/qt@5/lib ${LDFLAGS}"
-export CPPFLAGS="-I/opt/homebrew/opt/qt@5/include ${LDFLAGS}"
-export PKG_CONFIG_PATH="/opt/homebrew/opt/qt@5/lib/pkgconfig:${PKG_CONFIG_PATH}"
-export CMAKE_MODULE_PATH="/opt/homebrew/opt/qt5/lib/cmake/Qt5:${CMAKE_MODULE_PATH}"
-
 # Use Brew Ruby
 export PATH="/opt/homebrew/opt/ruby@2.7/bin:$PATH"
-
-# Use Brew libpg
-export PATH="/opt/homebrew/opt/libpq/bin:$PATH"
-export LDFLAGS="-L/opt/homebrew/opt/libpq/lib ${LDFLAGS}"
-export CPPFLAGS="-I/opt/homebrew/opt/libpq/include ${CPPFLAGS}"
-export PKG_CONFIG_PATH="/opt/homebrew/opt/libpq/lib/pkgconfig:${PKG_CONFIG_PATH}"
 
 # Update env variables
 export PATH="${HOME}/.cargo/bin:${PATH}"
 export PATH="${HOME}/.rustup/toolchains/nightly-x86_64-apple-darwin/bin:${PATH}"
 export PATH="/usr/local/texlive/2021/bin/universal-darwin:${PATH}"
-export SDKROOT=/Library/Developer/CommandLineTools/SDKs/MacOSX12.0.sdk
+export SDKROOT=/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk
 export CXX=clang++
 export CC=clang
 export OMPI_CXX=$CXX
 export OMPI_MPICC=$CC
 
+# For Rust builds?
+# https://users.rust-lang.org/t/ld-library-not-found-for-lsystem-on-a-mac-monterrey/69741
+export PATH=/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/lib:$PATH
+export LIBRARY_PATH="$LIBRARY_PATH:/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/lib"
+
 # For openMP on M1
 export OMP_NUM_THREADS=`sysctl -n hw.perflevel0.physicalcpu`
 export KMP_USE_YIELD=0
 export OMP_WAIT_POLICY=ACTIVE
+
+# Paraview settings, might help?
+export KNOB_MAX_WORKER_THREADS=`sysctl -n hw.perflevel0.physicalcpu`
+export OSPRAY_THREADS=`sysctl -n hw.perflevel0.physicalcpu`
+alias paraview='/Applications/ParaView-5.11.1.app/Contents/MacOS/paraview'
 
 # Obsidian Home
 export OBSIDIAN_HOME="/Users/russell/Library/Mobile Documents/iCloud~md~obsidian/Documents/Research"
@@ -127,10 +119,23 @@ export LC_ALL="en_US.UTF-8"
 # Aliases / One Liners
 #######################
 
-alias uconn_hpc_login='ssh rwb11001@login.storrs.hpc.uconn.edu'
+alias uconn_hpc_login='ssh rwb11001@hpc2.storrs.hpc.uconn.edu'
+alias mina_login='ssh bentley@mina.phys.uconn.edu'
+alias matlab='/Applications/MATLAB_R2021b.app/bin/matlab'
+alias vstool='/Applications/Visual\ Studio.app/Contents/MacOS/vstool'
+
+alias remarkable_login='ssh root@10.11.99.1'
 
 # https://www.youtube.com/watch?v=zJ7WAmX-xpk
 alias fix_mission_control='defaults write com.apple.dock mcx-expose-disabled -bool FALSE && killall Dock'
+
+# Fix Steam
+#
+# Won't Open, just bobs up and down.
+# One Mac
+# Found fix here:
+# https://steamcommunity.com/discussions/forum/2/135509472109954026/
+alias 'fixSteam'='rm -rf ~/Library/Application\ Support/Steam'
 
 # use to open stuff with firefox
 # macOS only
@@ -157,7 +162,8 @@ function addWorktree {
 # conan / INTACT alias
 alias conans='conan install -s build_type=Release .. --build=missing'
 
-alias freshbuild='mkdir build && cd build && conans && cmake .. && make -j 20'
+alias freshbuild='mkdir build && cd build && conans && jmake'
+alias jmake='cmake .. -DBUILD_GENERATIVE=ON -DBUILD_CLI=ON -DBUILD_MFEM=ON -DBUILD_TELEMETRY=OFF -DLICENSE_CHECK_TYPE=none && make -j 20'
 
 alias setup_tree='mkdir build && cd build && conans && cmake .. && make -j 20'
 
@@ -271,7 +277,6 @@ alias tvim='nvim term://zsh'
 # misc aliases
 alias fd='fd --hidden'
 alias alert='echo "\a"'
-alias fixSubmodules='git submodule update --init --recursive'
 alias runSketch='processing-java --sketch=$(pwd) --output=$(pwd)/output --force --run'
 
 # this one gets passed a list of filenames, will return <linecount>\t<filename>
@@ -343,14 +348,14 @@ function formatChanges {
     rg '\W+(modified|new file):\W+([a-zA-Z./]+)' -r '$2' | \
     rg '\.(cpp|h|hpp)$' | \
     xargs -n 1 realpath | \
-    xargs clang-format-11 -i --style=file --verbose
+    xargs clang-format -i --style=file --verbose
 }
 
 function formatAll {
     find \
         dm_deliverable core test/src test/inc cli scripts generative \
         '(' -name '*.cpp' -or -name '*.h' -or -name '*.hpp' ')' -exec \
-        clang-format-11 -i --style=file --verbose {} ';'
+        clang-format -i --style=file --verbose {} ';'
 
 #    find \
 #        core test/src test/inc cli scripts \
@@ -392,6 +397,19 @@ function lastScreenshot {
   cp "$pic_path" "$dest_path"
 }
 
+function lastBib {
+  bib_path=`ls ~/Downloads/* -s modified | rg '.*\.bib|.*\.ris$' | tail -n 1`
+  extension=`echo "${bib_path}" | rg ".*\.(...)" -r '$1' -o`
+  if [[ $extension == "ris" ]]
+  then
+    col_echo "ris file: ${bib_path}" 4
+    ris2xml "${bib_path}" | xml2bib -b | pbcopy
+  else
+    col_echo "Bibtex file: ${bib_path}" 4
+    cat "${bib_path}" | pbcopy
+  fi
+}
+
 function lastPdfHere {
   dest_path=`pwd`/$1
 
@@ -407,6 +425,17 @@ function lastPdfHere {
     echo "---" ) | \
     pbcopy
   pbpaste
+}
+
+function lastMp4Here {
+  dest_path=`pwd`/$1
+
+  pdf_path=`ls ~/Downloads/*.mp4 -s modified | tail -n 1`
+  pdf_name=$dest_path:t
+
+  col_echo "mp4 name: ${pdf_name}" 4 &&
+  col_echo "cp $pdf_path to $dest_path" 4 &&
+  cp "$pdf_path" "$dest_path" &&
 }
 
 function lastPdf {
@@ -436,6 +465,31 @@ function frame2film {
     -pix_fmt yuv420p \
     "$2"
 }
+
+function makemovie {
+  ffmpeg \
+    -framerate 30 \
+    -pattern_type glob \
+    -i frame* \
+    -c:v \
+    libx264 \
+    -pix_fmt yuv420p \
+    "out.mp4"
+}
+
+
+
+function runtime {
+  rg "Code run for ([\d.]+)" \
+    slurm-* \
+    -o -r '$1' \
+    -N -I \
+    | sort | awk '{total = total + $1}END{print total / (60 * 60)}'
+}
+
+alias drun='docker run -it -v ${PWD}:/app'
+
+alias uconn='cat ~/ucon_sec_for_sure | base64 --decode | pbcopy'
 
 ######################
 # Done
