@@ -1,0 +1,12 @@
+
+[font]
+size = 16
+
+[font.normal]
+family = "Source Code Pro for Powerline"
+
+[window]
+title = "T E R M I N A L"
+
+[general]
+import = ["/Users/russell/projects/config_files/alacritty/dracula.toml"]

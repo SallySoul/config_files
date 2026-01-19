@@ -133,7 +133,6 @@ set shortmess+=c
 " rust-tools will configure and enable certain LSP features for us.
 " See https://github.com/simrat39/rust-tools.nvim#configuration
 lua <<EOF
-local nvim_lsp = require('lspconfig')
 
 -- in the middle of rust stuff cuase I dont know what Im doing
 -- https://github.com/wgsl-analyzer/wgsl-analyzer 
