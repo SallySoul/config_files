@@ -77,6 +77,8 @@ export PATH="/opt/homebrew/opt/ruby@2.7/bin:$PATH"
 
 # Update env variables
 export PATH="${HOME}/.cargo/bin:${PATH}"
+export PATH="${HOME}/.elixir-install/installs/otp/28.1/erts-16.1/bin:${PATH}"
+export PATH="${HOME}/.elixir-install/installs/elixir/1.19.0-otp-28/bin:${PATH}"
 export PATH="${HOME}/.rustup/toolchains/nightly-x86_64-apple-darwin/bin:${PATH}"
 export PATH="/usr/local/texlive/2021/bin/universal-darwin:${PATH}"
 export SDKROOT=/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk
